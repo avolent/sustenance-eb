@@ -1,0 +1,5 @@
+# App zip files
+app.zip
+
+# Terraform files
+.terraform

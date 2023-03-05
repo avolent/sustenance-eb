@@ -1,0 +1,47 @@
+name: deploy
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - infrastructure/**
+      - app/**
+      - .github/workflows/deploy.yml
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    env: 
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout code
+        id: checkout
+        uses: actions/checkout@v3
+        
+      - name: Plan Changes
+        id: plan
+        run: make run_plan
+
+  deploy:
+    environment: approval
+    needs: plan
+    runs-on: ubuntu-latest
+    env: 
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+    - name: Checkout code
+      id: checkout
+      uses: actions/checkout@v3
+    
+    - name: Install requirements
+      id: requirements
+      run: sudo apt update && sudo apt install -y zip
+    
+    - name: Plan Changes
+      id: plan
+      run: make run_plan
+
+    - name: Deploy Changes
+      id: deploy
+      run: make run_apply
