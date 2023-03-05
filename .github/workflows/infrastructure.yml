@@ -1,11 +1,10 @@
-name: deploy
+name: Infrastructure
 on:
   push:
     branches:
       - main
     paths:
       - infrastructure/**
-      - app/**
       - .github/workflows/deploy.yml
 jobs:
   plan:
@@ -17,7 +16,7 @@ jobs:
       - name: Checkout code
         id: checkout
         uses: actions/checkout@v3
-        
+
       - name: Plan Changes
         id: plan
         run: make run_plan
