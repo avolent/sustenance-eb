@@ -28,6 +28,7 @@ deploy_app: zip
 	echo "Creating/Deploying new version"
 	aws elasticbeanstalk create-application-version --application-name sustenance --version-label $(shell git rev-parse --short HEAD) --source-bundle S3Bucket=sustenance-app,S3Key=beanstalk/app-$(shell git rev-parse --short HEAD).zip
 	aws elasticbeanstalk update-environment --environment-name sustenance-env --version-label $(shell git rev-parse --short HEAD)
+
 zip:
 	cd application/; zip -r ../app.zip application.py Procfile requirements.txt
 
