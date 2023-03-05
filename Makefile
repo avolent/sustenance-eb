@@ -23,7 +23,9 @@ run_app:
 
 deploy_app: zip
 	aws --version
+	echo "Uploading artifact"
 	aws s3 cp app.zip s3://sustenance-app/beanstalk/app-$(shell git rev-parse --short HEAD).zip
+	echo "Creating/Deploying new version"
 	aws elasticbeanstalk create-application-version --application-name sustenance --version-label $(shell git rev-parse --short HEAD) --source-bundle S3Bucket=sustenance-app,S3Key=beanstalk/app-$(shell git rev-parse --short HEAD).zip
 	aws elasticbeanstalk update-environment --environment-name sustenance-env --version-label $(shell git rev-parse --short HEAD)
 zip:
