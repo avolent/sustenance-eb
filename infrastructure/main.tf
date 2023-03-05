@@ -1,12 +1,12 @@
 # App S3 Bucket
 resource "aws_s3_bucket" "bucket" {
-  bucket = "sustenance-app" # Name of S3 bucket to create for Flask app deployment needs to be unique 
+  bucket = "sustenance-app"
 }
 
 # App Files to be stored in S3 bucket
 resource "aws_s3_object" "object" {
   bucket = aws_s3_bucket.bucket.id
-  key    = "beanstalk/app.zip"
+  key    = "beanstalk/app-${var.commit_id}.zip"
   source = "../app.zip"
 }
 
@@ -21,7 +21,11 @@ resource "aws_elastic_beanstalk_application_version" "version" {
   bucket      = aws_s3_bucket.bucket.id
   key         = aws_s3_object.object.id
   application = aws_elastic_beanstalk_application.app.name
-  name        = "latest"
+  name        = var.commit_id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Elastic Beanstalk Environment

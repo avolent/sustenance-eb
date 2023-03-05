@@ -33,7 +33,7 @@ init:
 	cd infrastructure/; terraform init -input=false; terraform validate; terraform fmt
 
 plan:
-	cd infrastructure/; terraform plan -out=tfplan -input=false
+	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -out=tfplan -input=false
 
 apply:
 	cd infrastructure/; terraform apply "tfplan"
