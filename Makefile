@@ -26,7 +26,7 @@ deploy_app: zip
 	aws --region ap-southeast-2 elasticbeanstalk create-application-version --application-name sustenance --version-label $(shell git rev-parse --short HEAD) --source-bundle S3Bucket=sustenance-app,S3Key=beanstalk/app-$(shell git rev-parse --short HEAD).zip
 	aws --region ap-southeast-2 elasticbeanstalk update-environment --environment-name sustenance-env --version-label $(shell git rev-parse --short HEAD)
 zip:
-	zip -r app.zip app/
+	cd application/; zip -r ../app.zip application.py Procfile requirements.txt
 
 # Terraform Commands
 init:
