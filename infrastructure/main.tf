@@ -22,10 +22,6 @@ resource "aws_elastic_beanstalk_application_version" "version" {
   key         = aws_s3_object.object.id
   application = aws_elastic_beanstalk_application.app.name
   name        = var.commit_id
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # Elastic Beanstalk Environment
