@@ -32,12 +32,21 @@ resource "aws_elastic_beanstalk_environment" "env" {
   description         = "Sustenance Enviroment"
   version_label       = aws_elastic_beanstalk_application_version.version.name
 
+  # Autoscaling
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
     value     = "aws-elasticbeanstalk-ec2-role"
   }
 
+  # VPC
+  setting {
+    namespace = "aws:ec2:vpc"
+    name = "AssociatePublicIpAddress"
+    value = "false"
+  }
+
+  # Instances
   setting {
     namespace = "aws:ec2:instances"
     name      = "EnableSpot"
@@ -54,5 +63,12 @@ resource "aws_elastic_beanstalk_environment" "env" {
     namespace = "aws:ec2:instances"
     name      = "SpotMaxPrice"
     value     = "0.0052"
+  }
+
+  # Updating
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions:platformupdate"
+    name = "UpdateLevel"
+    value = "minor"
   }
 }
