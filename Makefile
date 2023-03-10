@@ -12,14 +12,14 @@ local: requirements
 
 requirements:
 	pipenv install
-	pipenv run pip freeze > app/requirements.txt
+	pipenv run pip freeze > application/requirements.txt
 
 version:
 	aws --version
 	terraform --version
 
 run_app:
-	cd app/; flask --app application run
+	cd application/; flask --app application:app run
 
 deploy_app: zip
 	aws --version
