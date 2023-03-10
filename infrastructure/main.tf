@@ -37,4 +37,22 @@ resource "aws_elastic_beanstalk_environment" "env" {
     name      = "IamInstanceProfile"
     value     = "aws-elasticbeanstalk-ec2-role"
   }
+
+  setting {
+    namespace = "aws:ec2:instances"
+    name      = "EnableSpot"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:ec2:instances"
+    name      = "InstanceTypes"
+    value     = "t3a.nano,t3.nano"
+  }
+
+  setting {
+    namespace = "aws:ec2:instances"
+    name      = "SpotMaxPrice"
+    value     = "0.0052"
+  }
 }
