@@ -32,6 +32,50 @@ resource "aws_elastic_beanstalk_environment" "env" {
   description         = "Sustenance Enviroment"
   version_label       = aws_elastic_beanstalk_application_version.version.name
 
+  # Environment
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name = "LoadBalancerType"
+    value = "application"
+  }
+
+  # Logs
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name = "StreamLogs"
+    value = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name = "DeleteOnTerminate"
+    value = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name = "RetentionInDays"
+    value = "7"
+  }
+
+  setting {
+    namespace = "Namespace: aws:elasticbeanstalk:cloudwatch:logs:health"
+    name = "HealthStreamingEnabled"
+    value = "true"
+  }
+
+  setting {
+    namespace = "Namespace: aws:elasticbeanstalk:cloudwatch:logs:health"
+    name = "DeleteOnTerminate"
+    value = "true"
+  }
+
+  setting {
+    namespace = "Namespace: aws:elasticbeanstalk:cloudwatch:logs:health"
+    name = "RetentionInDays"
+    value = "7"
+  }
+
   # Autoscaling
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -42,8 +86,8 @@ resource "aws_elastic_beanstalk_environment" "env" {
   # VPC
   setting {
     namespace = "aws:ec2:vpc"
-    name = "AssociatePublicIpAddress"
-    value = "false"
+    name      = "AssociatePublicIpAddress"
+    value     = "false"
   }
 
   # Instances
@@ -67,8 +111,26 @@ resource "aws_elastic_beanstalk_environment" "env" {
 
   # Updating
   setting {
+    namespace = "aws:elasticbeanstalk:managedactions"
+    name      = "ManagedActionsEnabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions"
+    name      = "PreferredStartTime"
+    value     = "Sun:23:00"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions"
+    name      = "ServiceRoleForManagedUpdates"
+    value     = "AWSServiceRoleForElasticBeanstalkManagedUpdates"
+  }
+
+  setting {
     namespace = "aws:elasticbeanstalk:managedactions:platformupdate"
-    name = "UpdateLevel"
-    value = "minor"
+    name      = "UpdateLevel"
+    value     = "minor"
   }
 }
