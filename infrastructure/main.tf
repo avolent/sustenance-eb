@@ -1,11 +1,6 @@
-# App S3 Bucket
-resource "aws_s3_bucket" "bucket" {
-  bucket = "sustenance-app"
-}
-
 # App Files to be stored in S3 bucket
 resource "aws_s3_object" "object" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = "sustenance-app"
   key    = "beanstalk/app-${var.commit_id}.zip"
   source = "../app.zip"
 }
@@ -14,6 +9,12 @@ resource "aws_s3_object" "object" {
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "sustenance"
   description = "Sustenance on the web"
+
+  appversion_lifecycle {
+    service_role          = "arn:aws:iam::646540242297:role/aws-elasticbeanstalk-service-role"
+    max_count             = 10
+    delete_source_from_s3 = true
+  }
 }
 
 # Elastic Beanstalk App Version
@@ -22,6 +23,7 @@ resource "aws_elastic_beanstalk_application_version" "version" {
   key         = aws_s3_object.object.id
   application = aws_elastic_beanstalk_application.app.name
   name        = var.commit_id
+  force_delete = "true"
 }
 
 # Elastic Beanstalk Environment
