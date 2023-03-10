@@ -87,7 +87,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
   setting {
     namespace = "aws:ec2:vpc"
     name      = "AssociatePublicIpAddress"
-    value     = "false"
+    value     = "true"
   }
 
   # Instances
@@ -106,7 +106,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
   setting {
     namespace = "aws:ec2:instances"
     name      = "SpotMaxPrice"
-    value     = "0.0052"
+    value     = "0.0066"
   }
 
   # Updating
