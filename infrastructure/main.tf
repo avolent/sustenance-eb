@@ -35,45 +35,45 @@ resource "aws_elastic_beanstalk_environment" "env" {
   # Environment
   setting {
     namespace = "aws:elasticbeanstalk:environment"
-    name = "LoadBalancerType"
-    value = "application"
+    name      = "LoadBalancerType"
+    value     = "application"
   }
 
   # Logs
   setting {
     namespace = "aws:elasticbeanstalk:cloudwatch:logs"
-    name = "StreamLogs"
-    value = "true"
+    name      = "StreamLogs"
+    value     = "true"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:cloudwatch:logs"
-    name = "DeleteOnTerminate"
-    value = "true"
+    name      = "DeleteOnTerminate"
+    value     = "true"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:cloudwatch:logs"
-    name = "RetentionInDays"
-    value = "7"
+    name      = "RetentionInDays"
+    value     = "7"
   }
 
   setting {
-    namespace = "Namespace: aws:elasticbeanstalk:cloudwatch:logs:health"
-    name = "HealthStreamingEnabled"
-    value = "true"
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs:health"
+    name      = "HealthStreamingEnabled"
+    value     = "true"
   }
 
   setting {
-    namespace = "Namespace: aws:elasticbeanstalk:cloudwatch:logs:health"
-    name = "DeleteOnTerminate"
-    value = "true"
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs:health"
+    name      = "DeleteOnTerminate"
+    value     = "true"
   }
 
   setting {
-    namespace = "Namespace: aws:elasticbeanstalk:cloudwatch:logs:health"
-    name = "RetentionInDays"
-    value = "7"
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs:health"
+    name      = "RetentionInDays"
+    value     = "7"
   }
 
   # Autoscaling
