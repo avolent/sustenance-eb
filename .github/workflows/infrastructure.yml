@@ -28,7 +28,6 @@ jobs:
         run: make run_plan
 
   deploy:
-    environment: approval
     needs: plan
     runs-on: ubuntu-latest
 

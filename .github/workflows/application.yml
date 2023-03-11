@@ -9,7 +9,6 @@ on:
       - .github/workflows/application.yml
 jobs:
   deploy:
-    environment: approval
     runs-on: ubuntu-latest
 
     steps:
