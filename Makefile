@@ -37,7 +37,7 @@ init:
 	cd infrastructure/; terraform init -input=false; terraform validate; terraform fmt
 
 plan:
-	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -var="commit_id=$(shell git log -1 --pretty=%B)" -var="aws_region=$(AWS_REGION)" -out=tfplan -input=false
+	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -var="commit_description=$(shell git log -1 --pretty=%B)" -var="aws_region=$(AWS_REGION)" -out=tfplan -input=false
 
 apply:
 	cd infrastructure/; terraform apply "tfplan"
