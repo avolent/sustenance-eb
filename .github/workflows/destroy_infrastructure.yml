@@ -1,12 +1,6 @@
-name: Infrastructure
+name: Destroy Infrastructure
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - infrastructure/**
-      - .github/workflows/infrastructure.yml
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -23,11 +17,11 @@ jobs:
         id: checkout
         uses: actions/checkout@v3
 
-      - name: Plan Changes
-        id: plan
-        run: make run_plan
+      - name: Plan detroy
+        id: plan_destroy
+        run: make run_destroy_plan
 
-  deploy:
+  destroy:
     environment: approval
     needs: plan
     runs-on: ubuntu-latest
@@ -45,14 +39,10 @@ jobs:
       id: checkout
       uses: actions/checkout@v3
     
-    - name: Install requirements
-      id: requirements
-      run: sudo apt update && sudo apt install -y zip
-    
-    - name: Plan Changes
-      id: plan
-      run: make run_plan
+    - name: Plan Destroy
+      id: plan_destroy
+      run: make run_destroy_plan
 
-    - name: Deploy Changes
-      id: deploy
-      run: make run_apply
+    - name: Destroy
+      id: destroy
+      run: make run_destroy_plan

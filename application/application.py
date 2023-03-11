@@ -1,14 +1,15 @@
-from flask import Flask
+from flask import ( 
+    Flask,
+    render_template,
+)
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def home():
-    return "Hello, World! This is my test flask app running on Elastic Beanstalk!"
+    return render_template("index.html")
 
-@app.route('/health')
-def health():
-    return "Healthy"
 
 if __name__ == '__main__':
     app.run()

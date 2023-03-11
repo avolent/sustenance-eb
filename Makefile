@@ -19,25 +19,25 @@ version:
 	terraform --version
 
 run_app:
-	cd application/; flask --app application:app run
+	cd application/; flask --app application:app run --debug
 
 deploy_app: zip
 	aws --version
 	echo "Uploading artifact"
 	aws s3 cp app.zip s3://sustenance-app/beanstalk/app-$(shell git rev-parse --short HEAD).zip
 	echo "Creating/Deploying new version"
-	aws elasticbeanstalk create-application-version --application-name sustenance --version-label $(shell git rev-parse --short HEAD) --source-bundle S3Bucket=sustenance-app,S3Key=beanstalk/app-$(shell git rev-parse --short HEAD).zip
+	aws elasticbeanstalk create-application-version --application-name sustenance --version-label $(shell git rev-parse --short HEAD) --description "$(shell git log -1 --pretty=%B)" --source-bundle S3Bucket=sustenance-app,S3Key=beanstalk/app-$(shell git rev-parse --short HEAD).zip
 	aws elasticbeanstalk update-environment --environment-name sustenance-env --version-label $(shell git rev-parse --short HEAD)
 
 zip:
-	cd application/; zip -r ../app.zip application.py Procfile requirements.txt
+	rm -f app.zip; cd application; zip -r ../app.zip ./*
 
 # Terraform Commands
 init:
 	cd infrastructure/; terraform init -input=false; terraform validate; terraform fmt
 
 plan:
-	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -out=tfplan -input=false
+	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -var="commit_id=$(shell git log -1 --pretty=%B)" -var="aws_region=$(AWS_REGION)" -out=tfplan -input=false
 
 apply:
 	cd infrastructure/; terraform apply "tfplan"

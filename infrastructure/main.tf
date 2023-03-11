@@ -1,44 +1,79 @@
+# Data
+data "aws_route53_zone" "hosted_zone" {
+  name = "${var.root_domain}."
+}
+
+data "aws_s3_bucket" "sustenance_app" {
+  bucket = "${var.project_name}-app"
+}
+
+data "aws_iam_role" "eb_service_role" {
+  name = "aws-elasticbeanstalk-service-role"
+}
+
+
 # App Files to be stored in S3 bucket
 resource "aws_s3_object" "object" {
-  bucket = "sustenance-app"
+  bucket = data.aws_s3_bucket.sustenance_app.bucket
   key    = "beanstalk/app-${var.commit_id}.zip"
   source = "../app.zip"
 }
 
 # Elastic Beanstalk Application
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "sustenance"
-  description = "Sustenance on the web"
+  name        = var.project_name
+  description = "${var.project_name} on the web"
 
   appversion_lifecycle {
-    service_role          = "arn:aws:iam::646540242297:role/aws-elasticbeanstalk-service-role"
-    max_count             = 10
+    service_role          = data.aws_iam_role.eb_service_role.arn
+    max_count             = 1
     delete_source_from_s3 = true
   }
 }
 
 # Elastic Beanstalk App Version
 resource "aws_elastic_beanstalk_application_version" "version" {
-  bucket      = aws_s3_bucket.bucket.id
-  key         = aws_s3_object.object.id
-  application = aws_elastic_beanstalk_application.app.name
-  name        = var.commit_id
+  bucket       = aws_s3_object.object.bucket
+  key          = aws_s3_object.object.id
+  application  = aws_elastic_beanstalk_application.app.name
+  name         = var.commit_id
+  description = var.commit_description
   force_delete = "true"
 }
 
 # Elastic Beanstalk Environment
 resource "aws_elastic_beanstalk_environment" "env" {
-  name                = "sustenance-env"
+  name                = "${var.project_name}-env"
   application         = aws_elastic_beanstalk_application.app.name
   solution_stack_name = "64bit Amazon Linux 2 v3.4.4 running Python 3.8"
-  description         = "Sustenance Enviroment"
+  description         = "${var.project_name} environment"
   version_label       = aws_elastic_beanstalk_application_version.version.name
 
+  ## Environment Settings
   # Environment
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "LoadBalancerType"
     value     = "application"
+  }
+
+  # Loadbalancer listeners
+  setting {
+    namespace = "aws:elbv2:listener:default"
+    name      = "ListenerEnabled"
+    value     = "false"
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
+    value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
+    value     = aws_acm_certificate.https_certificate.arn
   }
 
   # Logs
@@ -135,4 +170,94 @@ resource "aws_elastic_beanstalk_environment" "env" {
     name      = "UpdateLevel"
     value     = "minor"
   }
+
+  # Cognito 
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "COGNITO_USER_POOL_ID"
+    value     = aws_cognito_user_pool.user_pool.id
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "COGNITO_APP_CLIENT_ID"
+    value     = aws_cognito_user_pool_client.app_client.id
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "COGNITO_REGION"
+    value     = var.aws_region
+  }
+}
+
+# Domain Settings
+resource "aws_route53_record" "record" {
+  zone_id = data.aws_route53_zone.hosted_zone.id
+  name    = "${var.sub_domain}.avolent.cloud"
+  type    = "CNAME"
+  ttl     = 300
+  records = [
+    aws_elastic_beanstalk_environment.env.endpoint_url
+  ]
+}
+
+resource "aws_route53_record" "www_record" {
+  zone_id = data.aws_route53_zone.hosted_zone.id
+  name    = "www.${var.sub_domain}.avolent.cloud"
+  type    = "CNAME"
+  ttl     = 300
+  records = [
+    aws_elastic_beanstalk_environment.env.endpoint_url
+  ]
+}
+
+# HTTPS Setup
+resource "aws_acm_certificate" "https_certificate" {
+  domain_name       = var.root_domain
+  validation_method = "DNS"
+
+  subject_alternative_names = [
+    "www.${var.root_domain}",
+    "${var.sub_domain}.${var.root_domain}",
+    "www.${var.sub_domain}.${var.root_domain}"
+  ]
+
+  lifecycle {
+    create_before_destroy = "true"
+  }
+}
+
+resource "aws_route53_record" "validation_records" {
+  for_each = {
+    for dvo in aws_acm_certificate.https_certificate.domain_validation_options : dvo.domain_name => {
+      name    = dvo.resource_record_name
+      record  = dvo.resource_record_value
+      type    = dvo.resource_record_type
+      zone_id = dvo.domain_name == var.root_domain ? data.aws_route53_zone.hosted_zone.zone_id : data.aws_route53_zone.hosted_zone.zone_id
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = each.value.zone_id
+}
+
+resource "aws_acm_certificate_validation" "validation" {
+  certificate_arn         = aws_acm_certificate.https_certificate.arn
+  validation_record_fqdns = [for record in aws_route53_record.validation_records : record.fqdn]
+}
+
+# Cognito
+resource "aws_cognito_user_pool" "user_pool" {
+  name = "sustenance-user-pool"
+}
+
+resource "aws_cognito_user_pool_client" "app_client" {
+  name            = "sustenance-client"
+  user_pool_id    = aws_cognito_user_pool.user_pool.id
+  generate_secret = true
 }
