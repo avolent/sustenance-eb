@@ -1,62 +1,211 @@
+/* Reset styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global styles */
 body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  
-  header {
-    background-color: #333;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1rem;
-  }
-  
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f7f7f7;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header styles */
+header {
+  background-color: #FDB813;
+  padding: 20px 0;
+  position: fixed;
+  width: 100%;
+  z-index: 100;
+}
+
+header h1 {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-left: 20px;
+}
+
+header nav {
+  float: right;
+  margin-right: 20px;
+}
+
+header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+header nav ul li {
+  display: inline-block;
+  margin-left: 20px;
+}
+
+header nav ul li:first-child {
+  margin-left: 0;
+}
+
+header nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+header nav ul li a:hover {
+  color: #000;
+}
+
+/* Main styles */
+main {
+  padding-top: 80px;
+}
+
+section#recipes {
+  margin-bottom: 40px;
+}
+
+section#recipes h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #757575;
+}
+
+section#recipes ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+section#recipes li {
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
+  background-color: #fff;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+section#recipes li:hover {
+  box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
+}
+
+section#recipes li h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #FDB813;
+}
+
+section#recipes li p {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #757575;
+}
+
+section#recipes button {
+  background-color: #FDB813;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  font-size: 1rem;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+section#recipes button:hover {
+  background-color: #F5A623;
+}
+
+section#shopping-list {
+  border-top: 1px solid #ccc;
+  padding-top: 40px;
+}
+
+section#shopping-list h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #757575;
+}
+
+section#shopping-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+section#shopping-list ul li {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #757575;
+}
+
+section#shopping-list ul li span {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+/* Footer styles */
+footer {
+  background-color: #FDB813;
+  padding: 20px 0;
+  color: #fff;
+  text-align: center;
+  margin-top: 40px;
+}
+
+footer p {
+  font-size: 1rem;
+}
+
+/* Media queries */
+@media screen and (max-width: 768px) {
   header h1 {
-    margin: 0;
     font-size: 2rem;
   }
   
-  nav ul {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    display: flex;
-  }
-  
-  nav li {
-    margin: 0 0.5rem;
-  }
-  
-  nav a {
-    color: white;
-    text-decoration: none;
-  }
-  
-  main {
-    padding: 1rem;
-  }
-  
-  .recipe {
-    background-color: #f7f7f7;
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .recipe h3 {
-    margin-top: 0;
-  }
-  
-  .ingredients {
-    background-color: #f7f7f7;
-    padding: 1rem;
-  }
-  
-  footer {
-    background-color: #333;
-    color: white;
-    padding: 0.5rem 1rem;
+  header nav {
+    margin-top: 10px;
+    float: none;
     text-align: center;
   }
   
+  header nav ul li {
+    display: block;
+    margin: 10px 0;
+  }
+  
+  section#recipes li {
+    padding: 10px;
+  }
+  
+  section#recipes li h3 {
+    font-size: 1.25rem;
+  }
+  
+  section#recipes li p {
+    font-size: 0.875rem;
+  }
+  
+  section#recipes button {
+    font-size: 0.875rem;
+    padding: 8px 16px;
+  }
+  
+  section#shopping-list ul li {
+    font-size: 0.875rem;
+  }
+}

@@ -10,44 +10,70 @@
   </head>
   <body>
     <header>
-      <h1>Sustenance</h1>
-      <nav>
-        <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Recipes</a></li>
-          <li><a href="#">Ingredients</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </nav>
+      <div class="container">
+        <h1>Sustenance</h1>
+        <nav>
+          <ul>
+            <li><a href="#">Recipes</a></li>
+            <li><a href="#">Shopping List</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
     <main>
-      <h2>Random Recipe</h2>
-      <p>Here's a random recipe for you to try:</p>
-      <div class="recipe">
-        <h3>Chicken Alfredo</h3>
-        <ul>
-          <li>1 lb. fettuccine pasta</li>
-          <li>4 boneless, skinless chicken breasts</li>
-          <li>1/4 cup unsalted butter</li>
-          <li>1 pint heavy cream</li>
-          <li>1 cup grated Parmesan cheese</li>
-          <li>Salt and pepper to taste</li>
-        </ul>
-      </div>
-      <p>And here are the total ingredients:</p>
-      <div class="ingredients">
-        <ul>
-          <li>1 lb. fettuccine pasta</li>
-          <li>4 boneless, skinless chicken breasts</li>
-          <li>1/4 cup unsalted butter</li>
-          <li>1 pint heavy cream</li>
-          <li>1 cup grated Parmesan cheese</li>
-          <li>Salt and pepper to taste</li>
-        </ul>
+      <div class="container">
+        <section id="recipes">
+          <h2>Recipes</h2>
+          <ul>
+            <li>
+              <h3>Spaghetti Carbonara</h3>
+              <p>A delicious Italian pasta dish made with eggs, bacon, and Parmesan cheese.</p>
+              <button data-recipe="Spaghetti Carbonara">Add to Shopping List</button>
+            </li>
+            <li>
+              <h3>Roast Chicken</h3>
+              <p>A classic roasted chicken recipe that's perfect for Sunday dinner.</p>
+              <button data-recipe="Roast Chicken">Add to Shopping List</button>
+            </li>
+            <li>
+              <h3>Veggie Burger</h3>
+              <p>A plant-based burger patty made with black beans, quinoa, and mushrooms.</p>
+              <button data-recipe="Veggie Burger">Add to Shopping List</button>
+            </li>
+            <li>
+              <h3>Vegetable Stir-Fry</h3>
+              <p>A healthy and flavorful stir-fry with colorful vegetables and a tangy sauce.</p>
+              <button data-recipe="Vegetable Stir-Fry">Add to Shopping List</button>
+            </li>
+          </ul>
+        </section>
+        <section id="shopping-list">
+          <h2>Shopping List</h2>
+          <ul>
+            <li>6 Eggs</li>
+            <li>6 Slices of Bacon</li>
+            <li>1/2 cup Parmesan Cheese</li>
+            <li>1 Whole Chicken</li>
+            <li>1 Head of Garlic</li>
+            <li>1 Lemon</li>
+            <li>1 can of Black Beans</li>
+            <li>1 cup Quinoa</li>
+            <li>8 oz Mushrooms</li>
+            <li>1 Red Bell Pepper</li>
+            <li>1 Broccoli Crown</li>
+            <li>1/4 cup Soy Sauce</li>
+            <li>1 tbsp Sesame Oil</li>
+            <li>2 tbsp Honey</li>
+            <li>1 tbsp Cornstarch</li>
+          </ul>
+        </section>
       </div>
     </main>
     <footer>
-      <p>&copy; 2023 Sustenance. All rights reserved.</p>
+      <div class="container">
+        <p>&copy; 2023 Sustenance. All rights reserved.</p>
+      </div>
     </footer>
+    <script src="app.js"></script>
   </body>
-</html>
+  </html>
