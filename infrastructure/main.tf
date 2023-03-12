@@ -11,7 +11,6 @@ data "aws_iam_role" "eb_service_role" {
   name = "aws-elasticbeanstalk-service-role"
 }
 
-
 # App Files to be stored in S3 bucket
 resource "aws_s3_object" "object" {
   bucket = data.aws_s3_bucket.sustenance_app.bucket
@@ -37,7 +36,7 @@ resource "aws_elastic_beanstalk_application_version" "version" {
   key          = aws_s3_object.object.id
   application  = aws_elastic_beanstalk_application.app.name
   name         = var.commit_id
-  description = var.commit_description
+  description  = var.commit_description
   force_delete = "true"
 }
 
@@ -171,7 +170,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
     value     = "minor"
   }
 
-  # Cognito 
+  # Cognito Environment Variables
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "COGNITO_USER_POOL_ID"
@@ -183,6 +182,12 @@ resource "aws_elastic_beanstalk_environment" "env" {
     name      = "COGNITO_APP_CLIENT_ID"
     value     = aws_cognito_user_pool_client.app_client.id
   }
+
+  # setting {
+  #   namespace = "aws:elasticbeanstalk:application:environment"
+  #   name      = "COGNITO_IDENTITY_POOL_ID"
+  #   value     = aws_cognito_identity_pool.identity_pool.id
+  # }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -253,11 +258,39 @@ resource "aws_acm_certificate_validation" "validation" {
 
 # Cognito
 resource "aws_cognito_user_pool" "user_pool" {
-  name = "sustenance-user-pool"
+  name = "${var.project_name}-user-pool"
+
+  username_attributes      = ["email"]
+  auto_verified_attributes = ["email"]
+}
+
+resource "aws_cognito_user_pool_domain" "app_domain" {
+  domain       = var.project_name
+  user_pool_id = aws_cognito_user_pool.user_pool.id
 }
 
 resource "aws_cognito_user_pool_client" "app_client" {
-  name            = "sustenance-client"
-  user_pool_id    = aws_cognito_user_pool.user_pool.id
-  generate_secret = true
+  name         = "${var.project_name}-client"
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+
+  allowed_oauth_flows_user_pool_client = "true"
+  generate_secret                      = "true"
+  callback_urls                        = ["https://${var.sub_domain}.${var.root_domain}/login/callback"]
+  allowed_oauth_flows                  = ["implicit"]
+  allowed_oauth_scopes                 = ["openid"]
+  supported_identity_providers         = ["COGNITO"]
 }
+
+# resource "aws_cognito_identity_pool" "identity_pool" {
+#   identity_pool_name = "${var.project_name}-identity-pool"
+
+#   cognito_identity_providers {
+#     provider_name = "cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.user_pool.id}"
+#     client_id     = aws_cognito_user_pool_client.app_client.id
+#   }
+#   Define roles for authenticated and unauthenticated users
+#   roles {
+#     authenticated = "arn:aws:iam::123456789012:role/my-authenticated-role"
+#     unauthenticated = "arn:aws:iam::123456789012:role/my-unauthenticated-role"
+#   }
+# }

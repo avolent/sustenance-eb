@@ -10,7 +10,7 @@ variable "commit_id" {
 }
 
 variable "commit_description" {
-  type = string
+  type        = string
   description = "Commit description used for version description"
 }
 
@@ -29,4 +29,5 @@ variable "sub_domain" {
 variable "aws_region" {
   type        = string
   description = "The default aws region"
+  default     = "ap-southeast-2"
 }

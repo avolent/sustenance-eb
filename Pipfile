@@ -7,7 +7,8 @@ name = "pypi"
 flask = "*"
 gunicorn = "*"
 boto3 = "*"
-flask-bcrypt = "*"
+cryptography = "*"
+flask-dance = "*"
 
 [dev-packages]
 

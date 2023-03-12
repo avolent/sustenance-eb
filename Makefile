@@ -1,3 +1,5 @@
+export AWS_REGION
+
 run_plan: init plan
 
 run_apply: init zip apply
@@ -11,6 +13,7 @@ local: requirements
 	pipenv shell
 
 requirements:
+	pipenv clean
 	pipenv install
 	pipenv run pip freeze > application/requirements.txt
 
@@ -19,7 +22,7 @@ version:
 	terraform --version
 
 run_app:
-	cd application/; flask --app application:app run --debug
+	cd application/; flask --app application:app run --debug --cert=adhoc
 
 deploy_app: zip
 	aws --version
@@ -37,13 +40,13 @@ init:
 	cd infrastructure/; terraform init -input=false; terraform validate; terraform fmt
 
 plan:
-	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -var="commit_description=$(shell git log -1 --pretty=%B)" -var="aws_region=$(AWS_REGION)" -out=tfplan -input=false
+	cd infrastructure/; terraform plan -var="commit_id=$(shell git rev-parse --short HEAD)" -var="commit_description=$(shell git log -1 --pretty=%B)" -var="aws_region=$(shell echo $$AWS_REGION)" -out=tfplan -input=false
 
 apply:
 	cd infrastructure/; terraform apply "tfplan"
 
 destroy_plan:
-	cd infrastructure/; terraform plan -destroy
+	cd infrastructure/; terraform plan -destroy -var="commit_id=$(shell git rev-parse --short HEAD)" -var="commit_description=$(shell git log -1 --pretty=%B)" -var="aws_region=$(shell echo $$AWS_REGION)" -out=tfplan -input=false
 
 destroy_apply:
-	cd infrastructure/; terraform destroy -auto-approve
+	cd infrastructure/; terraform apply "tfplan" 

@@ -3,3 +3,4 @@ app.zip
 
 # Terraform files
 .terraform
+infrastructure/tfplan
