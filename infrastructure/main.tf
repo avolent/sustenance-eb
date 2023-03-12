@@ -170,7 +170,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
     value     = "minor"
   }
 
-  Cognito Environment Variables
+  # Cognito Environment Variables
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "COGNITO_USER_POOL_ID"
