@@ -274,7 +274,7 @@ resource "aws_cognito_user_pool_client" "app_client" {
   user_pool_id    = aws_cognito_user_pool.user_pool.id
   generate_secret = true
 
-  allowed_oauth_flows = [ "ALLOW_ADMIN_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH" ]
+  explicit_auth_flows = [ "ALLOW_ADMIN_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH" ]
 }
 
 # resource "aws_cognito_identity_pool" "identity_pool" {
