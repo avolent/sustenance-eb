@@ -22,7 +22,7 @@ version:
 	terraform --version
 
 run_app:
-	cd application/; flask --app application:app run --debug --cert=adhoc
+	cd application/; flask --app application:app run --debug
 
 deploy_app: zip
 	aws --version

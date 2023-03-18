@@ -8,7 +8,7 @@ flask = "*"
 gunicorn = "*"
 boto3 = "*"
 cryptography = "*"
-flask-dance = "*"
+flask-wtf = "*"
 
 [dev-packages]
 

@@ -183,6 +183,12 @@ resource "aws_elastic_beanstalk_environment" "env" {
     value     = aws_cognito_user_pool_client.app_client.id
   }
 
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "COGNITO_APP_CLIENT_SECRET"
+    value     = var.aws_region
+  }
+
   # setting {
   #   namespace = "aws:elasticbeanstalk:application:environment"
   #   name      = "COGNITO_IDENTITY_POOL_ID"
@@ -191,7 +197,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "COGNITO_REGION"
+    name      = "AWS_REGION"
     value     = var.aws_region
   }
 }
@@ -259,26 +265,16 @@ resource "aws_acm_certificate_validation" "validation" {
 # Cognito
 resource "aws_cognito_user_pool" "user_pool" {
   name = "${var.project_name}-user-pool"
-
-  username_attributes      = ["email"]
-  auto_verified_attributes = ["email"]
+  auto_verified_attributes = [ "email" ]
 }
 
-# resource "aws_cognito_user_pool_domain" "app_domain" {
-#   domain       = var.project_name
-#   user_pool_id = aws_cognito_user_pool.user_pool.id
-# }
 
 resource "aws_cognito_user_pool_client" "app_client" {
-  name         = "${var.project_name}-client"
-  user_pool_id = aws_cognito_user_pool.user_pool.id
+  name            = "${var.project_name}-client"
+  user_pool_id    = aws_cognito_user_pool.user_pool.id
+  generate_secret = true
 
-  allowed_oauth_flows_user_pool_client = "true"
-  generate_secret                      = "true"
-  callback_urls                        = ["https://${var.sub_domain}.${var.root_domain}/login/callback"]
-  allowed_oauth_flows                  = ["implicit"]
-  allowed_oauth_scopes                 = ["openid"]
-  supported_identity_providers         = ["COGNITO"]
+  allowed_oauth_flows = [ "ALLOW_ADMIN_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH" ]
 }
 
 # resource "aws_cognito_identity_pool" "identity_pool" {

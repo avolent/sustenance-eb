@@ -1,14 +1,13 @@
-import boto3
-from botocore.exceptions import ClientError
-from cognito import CognitoIdentityProviderWrapper
+import secrets
+
 from flask import ( 
     Flask,
     render_template,
     request,
-    redirect
 )
-import os
-import secrets
+from flask_wtf.csrf import CSRFProtect
+
+from .drivers.cognito import CognitoIdentityProviderWrapper
 
 app = Flask(__name__)
 app.config.update(
@@ -18,35 +17,63 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
 )
+csrf = CSRFProtect(app)
 
-COGNITO_REGION = os.getenv("COGNITO_REGION")
-USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
-APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
-# IDENTITY_POOL_ID = os.getenv("COGNITO_IDENTIY_POOL_ID")
+COGNITO = CognitoIdentityProviderWrapper()
 
-cognito = CognitoIdentityProviderWrapper(
-    cognito_idp_client=boto3.client("cognito-idp", region_name=COGNITO_REGION),
-    client_id=APP_CLIENT_ID,
-    user_pool_id=USER_POOL_ID,
-)
-
-
-# cognito_identity = boto3.client("cognito-identity", region_name=COGNITO_REGION)
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
+@app.route("/user")
+def user():
+    return render_template("login.html")
+
+
 @app.route("/register", methods=["POST"])
 def register():
-    try:
-        response = cognito.sign_up_user(
-            
-        )
-        return response
-    except Exception as error:
-        return error
+    response = COGNITO.sign_up_user(
+        user_name=request.form.get("email"),
+        user_email=request.form.get("email"),
+        password=request.form.get("password"),
+    )
+    if isinstance(response, Exception):
+        return str(response)
+    return response
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    response = COGNITO.sign_in(
+        user_name=request.form.get("email"),
+        password=request.form.get("password")
+    )
+    if isinstance(response, Exception):
+        return str(response)
+    return response
+    
+
+@app.route("/confirm", methods=["POST"])
+def confirm():
+    response = COGNITO.confirm_user_sign_up(
+        user_name=request.form.get("email"),
+        confirmation_code=request.form.get("confirmation")
+    )
+    if isinstance(response, Exception):
+        return str(response)
+    return response
+    
+    
+@app.route("/confirmation_code", methods=["POST"])
+def confirmation_code():
+    response = COGNITO.resend_confirmation(
+        user_name=request.form.get("email")
+    )
+    if isinstance(response, Exception):
+        return str(response)
+    return response
     
 
 if __name__ == "__main__":

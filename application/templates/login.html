@@ -8,6 +8,7 @@
 
 	<H1>Login</H1>
 	<form method="POST" action="{{ url_for('login') }}">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		<label for="email">Email:</label>
 		<input type="text" id="email" name="email"><br><br>
 
@@ -18,6 +19,7 @@
 	</form>
 	<h1>Register</h1>
 	<form method="POST" action="{{ url_for('register') }}">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		<label for="email">Email:</label>
 		<input type="text" id="email" name="email"><br><br>
 
@@ -28,6 +30,7 @@
 	</form>
 	<h1>Confirm User</h1>
 	<form method="POST" action="{{ url_for('confirm') }}">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		<label for="email">Email:</label>
 		<input type="text" id="email" name="email"><br><br>
 
@@ -38,6 +41,7 @@
 	</form>
 	<h1>Resend Confirmation Code</h1>
 	<form method="POST" action="{{ url_for('confirmation_code') }}">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		<label for="email">Email:</label>
 		<input type="text" id="email" name="email"><br><br>
 
