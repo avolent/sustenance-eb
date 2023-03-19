@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Account Confirmation</h1>
+<form method="POST" action="{{ url_for('confirm') }}">
+	{{ confirmation_form.hidden_tag() }}
+	<p>
+		{{ confirmation_form.email.label }}<br>
+		{{ confirmation_form.email(size=32) }}
+	</p>
+	<p>
+		{{ confirmation_form.code.label }}<br>
+		{{ confirmation_form.code(size=32) }}
+	</p>
+	<p>
+		{{ confirmation_form.submit() }}
+	</p>
+	<p>
+		{{ confirmation_form.resend() }}
+	</p>
+</form>
+{% endblock %}

@@ -9,6 +9,8 @@ gunicorn = "*"
 boto3 = "*"
 cryptography = "*"
 flask-wtf = "*"
+flask-login = "*"
+wtforms = {extras = ["email"], version = "*"}
 
 [dev-packages]
 

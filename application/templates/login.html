@@ -1,51 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Login Page</title>
-</head>
-<body>
-	<H1>User Info</H1>
+{% extends 'layout.html' %}
 
-	<H1>Login</H1>
-	<form method="POST" action="{{ url_for('login') }}">
-		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		<label for="email">Email:</label>
-		<input type="text" id="email" name="email"><br><br>
-
-		<label for="password">Password:</label>
-		<input type="password" id="password" name="password"><br><br>
-
-		<input type="submit" value="Login">
-	</form>
-	<h1>Register</h1>
-	<form method="POST" action="{{ url_for('register') }}">
-		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		<label for="email">Email:</label>
-		<input type="text" id="email" name="email"><br><br>
-
-		<label for="password">Password:</label>
-		<input type="password" id="password" name="password"><br><br>
-
-		<input type="submit" value="Register">
-	</form>
-	<h1>Confirm User</h1>
-	<form method="POST" action="{{ url_for('confirm') }}">
-		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		<label for="email">Email:</label>
-		<input type="text" id="email" name="email"><br><br>
-
-		<label for="confirmation">Confirmation Code:</label>
-		<input type="text" id="confirmation" name="confirmation"><br><br>
-
-		<input type="submit" value="Confirm">
-	</form>
-	<h1>Resend Confirmation Code</h1>
-	<form method="POST" action="{{ url_for('confirmation_code') }}">
-		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		<label for="email">Email:</label>
-		<input type="text" id="email" name="email"><br><br>
-
-		<input type="submit" value="Resend Confirmation Code">
-	</form>
-</body>
-</html>
+{% block content %}
+<h1>Login</h1>
+<form method="POST" action="{{ url_for('login') }}">
+	{{ form.hidden_tag() }}
+	<p>
+		{{ form.email.label }}<br>
+		{{ form.email(size=32) }}
+	</p>
+	<p>
+		{{ form.password.label }}<br>
+		{{ form.password(size=32) }}
+	</p>
+	<p>
+		{{ form.remember() }} {{ form.remember.label }}
+	</p>
+	<p>
+		{{ form.submit() }}
+	</p>
+</form>
+{% endblock %}
