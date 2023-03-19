@@ -52,6 +52,7 @@ def load_user(user_id):
 
 @app.route("/")
 def index():
+    print(session)
     return render_template("index.html")
 
 @app.route('/dashboard')
@@ -71,8 +72,8 @@ def login():
             )
             if isinstance(response, Exception):
                 return render_template("confirmation.html", confirmation_form=ConfirmationForm(), resend_form=ResendConfirmation())
-            session['access_token'] = response['AuthenticationResult']['AccessToken']
-            session['refresh_token'] = response['AuthenticationResult']['RefreshToken']
+            session["access_token"] = response["AuthenticationResult"]["AccessToken"]
+            session["refresh_token"] = response["AuthenticationResult"]["RefreshToken"]
             login_user(User(request.form.get("email"), True))
             return redirect(url_for("dashboard"))
     return render_template("login.html", form=form)
@@ -121,6 +122,8 @@ def logout():
     )
     if isinstance(response, Exception):
         return str(response)
+    session.pop("access_token", None)
+    session.pop("refresh_token", None)
     logout_user()
     return redirect(url_for("index"))
     
