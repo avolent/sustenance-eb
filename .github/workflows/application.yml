@@ -10,7 +10,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    concurrency:
+      group: application
     steps:
     - name: Configure AWS Credentials
       id: creds
@@ -26,7 +27,7 @@ jobs:
     
     - name: Install requirements
       id: requirements
-      run: sudo apt update && sudo apt install -y zip
+      run: sudo apt update && sudo apt install -y zip && make requirements
     
     - name: Deploy App
       id: deploy

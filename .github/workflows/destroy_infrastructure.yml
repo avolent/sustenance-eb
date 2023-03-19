@@ -25,7 +25,8 @@ jobs:
     environment: approval
     needs: plan
     runs-on: ubuntu-latest
-
+    concurrency:
+      group: application
     steps:
     - name: Configure AWS Credentials
       id: creds
