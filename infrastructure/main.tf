@@ -275,6 +275,7 @@ resource "aws_iam_policy" "policy" {
       {
         "Sid" : "CognitoAccess",
         "Action" : [
+          "cognito-idp:AdminGetUser",
           "cognito-idp:AdminInitiateAuth"
         ],
         "Effect" : "Allow",
