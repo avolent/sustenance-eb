@@ -4,6 +4,9 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
+    concurrency:
+      group: application
+      cancel-in-progress: true
     steps:
       - name: Configure AWS Credentials
         id: creds
@@ -27,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: application
+      cancel-in-progress: true
     steps:
     - name: Configure AWS Credentials
       id: creds

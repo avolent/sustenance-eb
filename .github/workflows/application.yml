@@ -27,7 +27,7 @@ jobs:
     
     - name: Install requirements
       id: requirements
-      run: sudo apt update && sudo apt install -y zip && make requirements
+      run: sudo apt update && sudo apt install -y zip
     
     - name: Deploy App
       id: deploy
