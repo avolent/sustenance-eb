@@ -116,7 +116,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    value     = "aws-elasticbeanstalk-ec2-role"
+    value     = aws_iam_instance_profile.profile.name
   }
 
   # VPC
@@ -186,7 +186,7 @@ resource "aws_elastic_beanstalk_environment" "env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "COGNITO_APP_CLIENT_SECRET"
-    value     = var.aws_region
+    value     = aws_cognito_user_pool_client.app_client.client_secret
   }
 
   # setting {
@@ -200,6 +200,100 @@ resource "aws_elastic_beanstalk_environment" "env" {
     name      = "AWS_REGION"
     value     = var.aws_region
   }
+}
+
+resource "aws_iam_role" "role" {
+  name = "${var.project_name}-elasticbeanstalk-ec2-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "policy" {
+  name = "${var.project_name}-elasticbeanstalk-policy"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "BucketAccess",
+        "Action" : [
+          "s3:Get*",
+          "s3:List*",
+          "s3:PutObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:s3:::elasticbeanstalk-*",
+          "arn:aws:s3:::elasticbeanstalk-*/*"
+        ]
+      },
+      {
+        "Sid" : "XRayAccess",
+        "Action" : [
+          "xray:PutTraceSegments",
+          "xray:PutTelemetryRecords",
+          "xray:GetSamplingRules",
+          "xray:GetSamplingTargets",
+          "xray:GetSamplingStatisticSummaries"
+        ],
+        "Effect" : "Allow",
+        "Resource" : "*"
+      },
+      {
+        "Sid" : "CloudWatchLogsAccess",
+        "Action" : [
+          "logs:PutLogEvents",
+          "logs:CreateLogStream",
+          "logs:DescribeLogStreams",
+          "logs:DescribeLogGroups"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:logs:*:*:log-group:/aws/elasticbeanstalk*"
+        ]
+      },
+      {
+        "Sid" : "ElasticBeanstalkHealthAccess",
+        "Action" : [
+          "elasticbeanstalk:PutInstanceStatistics"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:elasticbeanstalk:*:*:application/*",
+          "arn:aws:elasticbeanstalk:*:*:environment/*"
+        ]
+      },
+      {
+        "Sid" : "CognitoAccess",
+        "Action" : [
+          "cognito-idp:AdminInitiateAuth"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${aws_cognito_user_pool.user_pool.arn}",
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attachment" {
+  policy_arn = aws_iam_policy.policy.arn
+  role       = aws_iam_role.role.name
+}
+
+resource "aws_iam_instance_profile" "profile" {
+  name = "${var.project_name}-elasticbeanstalk-instance-profile"
+  role = aws_iam_role.role.name
 }
 
 # Domain Settings
@@ -264,17 +358,23 @@ resource "aws_acm_certificate_validation" "validation" {
 
 # Cognito
 resource "aws_cognito_user_pool" "user_pool" {
-  name = "${var.project_name}-user-pool"
-  auto_verified_attributes = [ "email" ]
-}
+  name                     = "${var.project_name}-user-pool"
+  auto_verified_attributes = ["email"]
 
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+}
 
 resource "aws_cognito_user_pool_client" "app_client" {
   name            = "${var.project_name}-client"
   user_pool_id    = aws_cognito_user_pool.user_pool.id
   generate_secret = true
 
-  explicit_auth_flows = [ "ALLOW_ADMIN_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH" ]
+  explicit_auth_flows = ["ALLOW_ADMIN_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
 }
 
 # resource "aws_cognito_identity_pool" "identity_pool" {
