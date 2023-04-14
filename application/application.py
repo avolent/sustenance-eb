@@ -38,22 +38,25 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     response = COGNITO.get_user(
         username=user_id
     )
+    print(response)
     if isinstance(response, Exception):
         LOGGER.error(f"User loader failed to retrieve details for {user_id}", exception=str(response))
         return None
-    return User(user_id, True)
+    user = User(user_id, True)
+    for attribute in response["UserAttributes"]:
+        setattr(user, attribute["Name"], attribute["Value"])
+    return user
 
 
 @app.route("/")
 def index():
-    print(session)
     return render_template("index.html")
+
 
 @app.route('/dashboard')
 @login_required
@@ -67,14 +70,14 @@ def login():
     if request.method == "POST":
         if form.validate_on_submit():
             response = COGNITO.sign_in(
-                username=request.form.get("email"),
+                username=request.form.get("email").lower(),
                 password=request.form.get("password")
             )
             if isinstance(response, Exception):
                 return render_template("confirmation.html", confirmation_form=ConfirmationForm(), resend_form=ResendConfirmation())
             session["access_token"] = response["AuthenticationResult"]["AccessToken"]
             session["refresh_token"] = response["AuthenticationResult"]["RefreshToken"]
-            login_user(User(request.form.get("email"), True))
+            login_user(User(request.form.get("email").lower(), True))
             return redirect(url_for("dashboard"))
     return render_template("login.html", form=form)
 
@@ -85,7 +88,7 @@ def register():
     if request.method == "POST":
         if form.validate_on_submit():
             response = COGNITO.sign_up_user(
-                username=request.form.get("email"),
+                username=request.form.get("email").lower(),
                 password=request.form.get("password"),
             )
             if isinstance(response, Exception):
@@ -98,7 +101,7 @@ def register():
 def confirm():
     if request.form.get("resend"):
         response = COGNITO.resend_confirmation(
-            username=request.form.get("email")
+            username=request.form.get("email").lower()
         )
         if isinstance(response, Exception):
             return str(response)
@@ -106,7 +109,7 @@ def confirm():
         response.status_code = 204
         return response
     response = COGNITO.confirm_user_sign_up(
-        username=request.form.get("email"),
+        username=request.form.get("email").lower(),
         confirmation_code=request.form.get("code")
     )
     if isinstance(response, Exception):
