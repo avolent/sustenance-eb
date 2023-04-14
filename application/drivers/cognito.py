@@ -8,8 +8,8 @@ from typing import Union
 import boto3
 from botocore.exceptions import ClientError
 
-LOGGER = logging.getLogger(__name__)
-COGNITO_CLIENT = boto3.client("cognito-idp", region_name=os.getenv("AWS_REGION"))
+logger = logging.getLogger(__name__)
+cognito_client = boto3.client("cognito-idp", region_name=os.getenv("AWS_REGION"))
 COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
 COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
 COGNITO_APP_CLIENT_SECRET = os.getenv("COGNITO_APP_CLIENT_SECRET")
@@ -24,7 +24,7 @@ class CognitoIdentityProviderWrapper:
         :param client_id: The ID of a client application registered with the user pool.
         :param client_secret: The client secret, if the client has a secret.
         """
-        self.cognito_idp_client = COGNITO_CLIENT
+        self.cognito_idp_client = cognito_client
         self.user_pool_id = COGNITO_USER_POOL_ID
         self.client_id = COGNITO_APP_CLIENT_ID
         self.client_secret = COGNITO_APP_CLIENT_SECRET
@@ -39,7 +39,7 @@ class CognitoIdentityProviderWrapper:
         msg = bytes(username + self.client_id, 'utf-8')
         secret_hash = base64.b64encode(
             hmac.new(key, msg, digestmod=hashlib.sha256).digest()).decode()
-        LOGGER.info("Made secret hash for %s: %s.", username, secret_hash)
+        logger.info("Made secret hash for %s: %s.", username, secret_hash)
         return secret_hash
 
     def sign_up_user(self, username: str, password: str) -> Union[str, Exception]:
@@ -67,10 +67,10 @@ class CognitoIdentityProviderWrapper:
             if err.response['Error']['Code'] == 'UsernameExistsException':
                 response = self.cognito_idp_client.admin_get_user(
                     UserPoolId=self.user_pool_id, Username=username)
-                LOGGER.warning(f"User {username} exists and is {response['UserStatus']}.")
+                logger.warning(f"User {username} exists and is {response['UserStatus']}.")
                 return Exception(f"User {username} exists and is {response['UserStatus']}.")
             else:
-                LOGGER.error(f"Couldn't sign up {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Code']}")
+                logger.error(f"Couldn't sign up {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Code']}")
                 return Exception(f"Couldn't sign up {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Code']}")
 
     def resend_confirmation(self, username: str) -> Union[str, Exception]:
@@ -90,7 +90,7 @@ class CognitoIdentityProviderWrapper:
                 **kwargs)
             return response
         except ClientError as err:
-            LOGGER.error(f"Couldn't resend confirmation to {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            logger.error(f"Couldn't resend confirmation to {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
             return Exception(f"Couldn't resend confirmation to {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
 
     def confirm_user_sign_up(self, username: str, confirmation_code: str) -> Union[str, Exception]:
@@ -111,16 +111,12 @@ class CognitoIdentityProviderWrapper:
             response = self.cognito_idp_client.confirm_sign_up(**kwargs)
             return response
         except ClientError as err:
-            LOGGER.error(f"Couldn't confirm sign up for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            logger.error(f"Couldn't confirm sign up for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
             return Exception(f"Couldn't confirm sign up for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
         
     def sign_in(self, username: str, password: str) -> Union[str, Exception]:
         """
         To be filled
-        :param username: The name of the user to confirm.
-        :param confirmation_code: The confirmation code sent to the user's registered
-                                  email address.
-        :return: True when the confirmation succeeds.
         """
         try:
             kwargs = {
@@ -133,16 +129,12 @@ class CognitoIdentityProviderWrapper:
             response = self.cognito_idp_client.admin_initiate_auth(**kwargs)
             return response
         except ClientError as err:
-            LOGGER.error(f"Couldn't sign in for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            logger.error(f"Couldn't sign in for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
             return Exception(f"Couldn't sign in for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
 
     def sign_out(self, username: str) -> Union[str, Exception]:
         """
         To be filled
-        :param username: The name of the user to confirm.
-        :param confirmation_code: The confirmation code sent to the user's registered
-                                  email address.
-        :return: True when the confirmation succeeds.
         """
         try:
             kwargs = {
@@ -152,8 +144,28 @@ class CognitoIdentityProviderWrapper:
             response = self.cognito_idp_client.admin_user_global_sign_out(**kwargs)
             return response
         except ClientError as err:
-            LOGGER.error(f"Couldn't sign in for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            logger.error(f"Couldn't sign in for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
             return Exception(f"Couldn't sign in for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+
+    def refresh_token(self, username: str, refresh_token: str) -> Union[str, Exception]:
+        """
+        To be filled
+
+        """
+        try:
+            kwargs = {
+                'UserPoolId': self.user_pool_id,
+                'ClientId': self.client_id,
+                'AuthFlow': 'REFRESH_TOKEN_AUTH',
+                'AuthParameters': {'REFRESH_TOKEN': refresh_token}}
+            if self.client_secret is not None:
+                kwargs['AuthParameters']['SECRET_HASH'] = self._secret_hash(username)
+            response = self.cognito_idp_client.admin_initiate_auth(**kwargs)
+            return response
+        except ClientError as err:
+            print(err)
+            logger.error(f"Couldn't refresh token for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            return Exception(f"Couldn't refresh token for {username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
 
 
     def get_user(self, username: str):
@@ -168,5 +180,5 @@ class CognitoIdentityProviderWrapper:
             response = self.cognito_idp_client.admin_get_user(**kwargs)
             return response
         except ClientError as err:
-            LOGGER.error(f"Couldn't retrieve {username} details. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            logger.error(f"Couldn't retrieve {username} details. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
             return Exception(f"Couldn't retrieve {username} details. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")

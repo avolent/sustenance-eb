@@ -1,5 +1,6 @@
 import secrets
 import logging
+from time import time
 
 from flask import ( 
     Flask,
@@ -31,8 +32,8 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
 )
 
-COGNITO = CognitoIdentityProviderWrapper()
-LOGGER = logging.getLogger(__name__)
+cognito = CognitoIdentityProviderWrapper()
+logger = logging.getLogger(__name__)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -40,12 +41,21 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    response = COGNITO.get_user(
+    if time() >= session["access_token_expiry"]:
+        response = cognito.refresh_token(
+            username=user_id,
+            refresh_token=session["refresh_token"]
+        )
+        if isinstance(response, Exception):
+            logger.error(f"User loader failed to refresh token for {user_id}", exception=str(response))
+            return None
+        session["access_token"] = response["AuthenticationResult"]["AccessToken"]
+        session["access_token_expiry"] = int(time() + response["AuthenticationResult"]["ExpiresIn"])
+    response = cognito.get_user(
         username=user_id
     )
-    print(response)
     if isinstance(response, Exception):
-        LOGGER.error(f"User loader failed to retrieve details for {user_id}", exception=str(response))
+        logger.error(f"User loader failed to retrieve details for {user_id}", exception=str(response))
         return None
     user = User(user_id, True)
     for attribute in response["UserAttributes"]:
@@ -69,17 +79,19 @@ def login():
     form = LoginForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            response = COGNITO.sign_in(
+            response = cognito.sign_in(
                 username=request.form.get("email").lower(),
                 password=request.form.get("password")
             )
             if isinstance(response, Exception):
                 return render_template("confirmation.html", confirmation_form=ConfirmationForm(), resend_form=ResendConfirmation())
+            print(response["AuthenticationResult"])
             session["access_token"] = response["AuthenticationResult"]["AccessToken"]
             session["refresh_token"] = response["AuthenticationResult"]["RefreshToken"]
+            session["access_token_expiry"] = int(time() + response["AuthenticationResult"]["ExpiresIn"])
             login_user(User(request.form.get("email").lower(), True))
             return redirect(url_for("dashboard"))
-    return render_template("login.html", form=form)
+    return render_template("login.html", form=form)  
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -87,7 +99,7 @@ def register():
     form = RegistrationForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            response = COGNITO.sign_up_user(
+            response = cognito.sign_up_user(
                 username=request.form.get("email").lower(),
                 password=request.form.get("password"),
             )
@@ -100,7 +112,7 @@ def register():
 @app.route("/confirm", methods=["POST"])
 def confirm():
     if request.form.get("resend"):
-        response = COGNITO.resend_confirmation(
+        response = cognito.resend_confirmation(
             username=request.form.get("email").lower()
         )
         if isinstance(response, Exception):
@@ -108,7 +120,7 @@ def confirm():
         response = make_response('')
         response.status_code = 204
         return response
-    response = COGNITO.confirm_user_sign_up(
+    response = cognito.confirm_user_sign_up(
         username=request.form.get("email").lower(),
         confirmation_code=request.form.get("code")
     )
@@ -120,7 +132,7 @@ def confirm():
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout():
-    response = COGNITO.sign_out(
+    response = cognito.sign_out(
         username=current_user.id
     )
     if isinstance(response, Exception):
