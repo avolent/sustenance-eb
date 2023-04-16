@@ -2,7 +2,7 @@ export AWS_REGION
 
 run_plan: init plan
 
-run_apply: init zip apply
+run_apply: init apply
 
 run_destroy_plan: init destroy_plan
 
