@@ -55,15 +55,15 @@ jobs:
     
     - name: Plan Infrastructure Changes
       id: plan
-      if: ${{ startsWith(github.event_path, "infrastructure/")}}
+      if: ${{ startsWith(github.event_path, 'infrastructure/')}}
       run: make run_plan
 
     - name: Deploy Infrastructure Changes
       id: deploy_infra
-      if: ${{ startsWith(github.event_path, "infrastructure/")}}
+      if: ${{ startsWith(github.event_path, 'infrastructure/')}}
       run: make run_apply
 
     - name: Deploy Application Changes
       id: deploy_app
-      if: ${{ startsWith(github.event_path, "application/")}}
+      if: ${{ startsWith(github.event_path, 'application/')}}
       run: make deploy_app
