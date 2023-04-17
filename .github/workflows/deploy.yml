@@ -1,17 +1,20 @@
-name: Application
+name: Deploy
 on:
   workflow_dispatch:
   push:
     branches:
       - main
     paths:
+      - infrastructure/**
       - application/**
-      - .github/workflows/application.yml
+      - .github/workflows/**
 jobs:
   deploy:
+    environment: deployment
     runs-on: ubuntu-latest
     concurrency:
       group: application
+      cancel-in-progress: true
     steps:
     - name: Configure AWS Credentials
       id: creds
@@ -20,7 +23,7 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
-
+    
     - name: Checkout code
       id: checkout
       uses: actions/checkout@v3
@@ -29,6 +32,17 @@ jobs:
       id: requirements
       run: sudo apt update && sudo apt install -y zip
     
-    - name: Deploy App
-      id: deploy
+    - name: Plan Infrastructure Changes
+      id: plan_infra
+      if: ${{ startsWith(github.event_path, 'infrastructure/')}}
+      run: make run_plan
+
+    - name: Deploy Infrastructure Changes
+      id: deploy_infra
+      if: ${{ startsWith(github.event_path, 'infrastructure/')}}
+      run: make run_apply
+
+    - name: Deploy Application Changes
+      id: deploy_app
+      if: ${{ startsWith(github.event_path, 'application/')}}
       run: make deploy_app

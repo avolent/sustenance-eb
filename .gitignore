@@ -9,4 +9,5 @@ infrastructure/tfplan
 __pycache__
 
 # Vscode
-.vscode
+.vscode/**
+

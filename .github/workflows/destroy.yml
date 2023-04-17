@@ -1,32 +1,9 @@
-name: Destroy Infrastructure
+name: Destroy
 on:
   workflow_dispatch:
 jobs:
-  plan:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: application
-      cancel-in-progress: true
-    steps:
-      - name: Configure AWS Credentials
-        id: creds
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-      
-      - name: Checkout code
-        id: checkout
-        uses: actions/checkout@v3
-
-      - name: Plan detroy
-        id: plan_destroy
-        run: make run_destroy_plan
-
   destroy:
-    environment: approval
-    needs: plan
+    environment: deployment
     runs-on: ubuntu-latest
     concurrency:
       group: application
