@@ -10,6 +10,7 @@ on:
       - .github/workflows/**
 jobs:
   deploy:
+    environment: deployment
     runs-on: ubuntu-latest
     concurrency:
       group: application

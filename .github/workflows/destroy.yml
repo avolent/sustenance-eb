@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
 jobs:
   destroy:
+    environment: deployment
     runs-on: ubuntu-latest
     concurrency:
       group: application
