@@ -27,4 +27,4 @@ jobs:
 
     - name: Destroy
       id: destroy
-      run: make run_destroy_plan
+      run: make run_destroy_apply
